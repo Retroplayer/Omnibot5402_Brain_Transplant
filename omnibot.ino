@@ -122,9 +122,9 @@ int getCommand(){
   
   // Take 2 samples. If all samples are not equal, reject the sample.
   // 5ms delay to allow time for the measurement
-  freq = FreqCount.read();
+  if(FreqCount.available()) freq = FreqCount.read();
   delay(5);
-  freq2 = FreqCount.read();
+  if(FreqCount.available()) freq2 = FreqCount.read();
   if(freq2 != freq) freq = 0; 
   
   if((freq > 6) || (freq < 24)){
@@ -155,9 +155,9 @@ int getCommandLoop(){
   
 	// Take 2 samples. If all samples are not equal, reject the sample.
 	// 5ms delay to allow time for the measurement
-	freq = FreqCount.read();
+	if(FreqCount.available()) freq = FreqCount.read();
 	delay(5);
-	freq2 = FreqCount.read();
+	if(FreqCount.available()) freq2 = FreqCount.read();
 	if(freq2 != freq) freq = 0; 
 	delay(5);
 	  
