@@ -20,6 +20,7 @@
 //#include <Talkie.h>
 //#include <AnyRtttl.h>
 
+// Strings used during debugging. These are output to the serial port to report which remote commands were detected. Will be removed.
 const char string_0[] PROGMEM = "INALID"; // "String 0" etc are strings to store - change to suit.
 const char string_1[] PROGMEM = "TALK ON";
 const char string_2[] PROGMEM = "FORWARD";
@@ -82,7 +83,7 @@ void Say(int PHRASE){
 }
 
 // Function to move the robot. This is very basic right now
-// Motors are connected to A0-A3 on the Uno
+// Motors are connected to A0-A3 on the Uno (P0 to A0, etc..)
 // TODO: Add code to add motors ie. void Move(int motor, int dir, int speed, int dur)
 // TODO: Add code for servo control
 void Move(int dir){
@@ -104,12 +105,15 @@ void Move(int dir){
       break;
   }
   
-  delay(200); //keep motor moving long enough to continue between commands
+  delay(200); //keep motor moving long enough to continue between commands. This is probably too long.
   PORTD |= STOP;
   moving = false;
 
 }
 
+// Function to receive the radio input and decode the tones into commands.
+// Filtering by taking 2 samples and rejecting the command if both samples do not match
+// Looking for most efficient way to do this
 int getCommand(){
 
   unsigned long freq = 0;
@@ -122,26 +126,23 @@ int getCommand(){
   delay(5);
   freq2 = FreqCount.read();
   if(freq2 != freq) freq = 0; 
-//  delay(5);
-//  freq = FreqCount.read();
-//  delay(5);
-//  freq2 = FreqCount.read();
-//  if(freq2 != freq) freq = 0; 
   
   if((freq > 6) || (freq < 24)){
     freq = freq - 6; // Subtract 6 to make commands = 1 to 17
     cmd = int(freq);
   } else {
-    cmd = 0;
+    cmd = 0; // Command is invalid
   }
   
   return cmd;
 
 }
 
+// Not Used currently
 // Experiment to try to run in a loop constantly unless a valid command is received from the remote.
 // When a valid command is received, it will break out, act on the command and then in the next (main)
 // loop, it will wait for a valid command again, and so on.
+// This code would be more accurate to the exct emulation of the robot, but will block out expandability
 int getCommandLoop(){
 
   unsigned long freq = 0;
@@ -159,10 +160,6 @@ int getCommandLoop(){
 	freq2 = FreqCount.read();
 	if(freq2 != freq) freq = 0; 
 	delay(5);
-	//  freq = FreqCount.read();
-	//  delay(5);
-	//  freq2 = FreqCount.read();
-	//  if(freq2 != freq) freq = 0; 
 	  
 	if((freq > 6) || (freq < 24)){
 		freq = freq - 6; // Subtract 6 to make commands = 1 to 17
@@ -190,33 +187,33 @@ void setup(){
   pinMode(pinSound1, OUTPUT);
   pinMode(pinSound2, OUTPUT);
   pinMode(pinTape, OUTPUT);
-  pinMode(pinRadio, INPUT);
   
   // Make sure tape and talk pins are not asserted
   digitalWrite(pinTalk, HIGH);
   digitalWrite(pinTape, HIGH);
   digitalWrite(pinSound2,HIGH);
   
-  //Play Melody at power on
+  //Play Melody at power on or reset
   digitalWrite(pinSound1, LOW);
   delay(20);
   digitalWrite(pinSound1, HIGH);
 
 }
 
-
+// Main loop
 void loop(){
   int cmd = 0;
   int dir = 0;
   bool moving = false;
   
-  
+  // We check to see if there is a remote command
   cmd = getCommand();
   if(cmd != 0){
     strcpy_P(buffer, (char *)pgm_read_word(&(string_table[cmd])));
     Serial.println(buffer);
   }
   
+  // Act on remote command
   switch (cmd) {
     
     //Drive commands
@@ -224,33 +221,37 @@ void loop(){
     case RGT:
     case REV:
     case LFT:
-    dir = cmd - 1;
-    moving = true;
-    Move(dir);
+    dir = cmd - 1; // convert the drive commands to 1 thru 4
+    moving = true; // Update the robot state to moving
+    Move(dir); // Do the actual moving
     moving = false;
     
     break;
       
-    case TALKON: // TALK ON
+    case TALKON: // TALK ON. Momentary. Relay stays engaged until the talk button is released.
       if(talkState == false){
-        digitalWrite(pinTalk, HIGH);
+        digitalWrite(pinTalk, LOW);
         delay(10);
+	talkState = true;
       }
     
       break;
       
-    case TALKOFF: // TALK OFF
+    case TALKOFF: // TALK OFF. Talk button was released. Relay is turned off.
       if(talkState == true){
-        digitalWrite(pinTalk, LOW);
+        digitalWrite(pinTalk, HIGH);
         delay(10);
+	talkState = false;
       } 
       break;
     
-    case TAPESS: // TAPE START/STOP
+    case TAPESS: // TAPE START/STOP. This output is latched. Pressing the button toggles the state
       if (tapeState == true){
         digitalWrite(pinTape, HIGH);
+	tapeState = false;
       } else {
           digitalWrite(pinTalk,LOW);
+	  talkState = true;
         }
       break;
     
