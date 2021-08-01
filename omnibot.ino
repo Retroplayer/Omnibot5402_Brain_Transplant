@@ -177,10 +177,10 @@ int getCommandLoop(){
 void setup(){
 
   Serial.begin(9600);
-  FreqCount.begin(5000);
+  FreqCount.begin(5);
   
-  DDRD |= B1111;
-  MOTOR_PORT |= B1111; //Stop Motors
+  DDRD |= B11110000;
+  MOTOR_PORT |= STOP; //Stop Motors
   
   // Set up data direction for the function pins
   pinMode(pinTalk, OUTPUT);
