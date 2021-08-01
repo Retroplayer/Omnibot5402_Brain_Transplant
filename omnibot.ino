@@ -60,10 +60,10 @@ bool moving = false;
 
 // Pin definitions
 const int pinTalk = 4;
-const int pinSound1 = 5;
-const int pinSound2 = 6;
-const int pinTape = 7;
-const int pinRadio = 2;
+const int pinSound1 = 6;
+const int pinSound2 = 7;
+const int pinTape = 8;
+const int pinRadio = 5;
 
 // TODO: Add code to play built in sounds or play programmed melodies.
 void playSound(int Sound){
