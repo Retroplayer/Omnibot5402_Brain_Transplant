@@ -21,7 +21,7 @@
 //#include <AnyRtttl.h>
 
 const char string_0[] PROGMEM = "INALID"; // "String 0" etc are strings to store - change to suit.
-const char string_1[] PROGMEM = "TALK OK";
+const char string_1[] PROGMEM = "TALK ON";
 const char string_2[] PROGMEM = "FORWARD";
 const char string_3[] PROGMEM = "RIGHT";
 const char string_4[] PROGMEM = "REVERSE";
@@ -43,7 +43,7 @@ char buffer[30];
 #define STOP    B11110000
 
 // Remote Commands
-const int   TALKON = 1;  // 1400Hz
+const int TALKON = 1;  // 1400Hz
 const int FWD = 2;     // 1600Hz
 const int RGT = 3;     // 1800Hz
 const int REV = 4;     // 2000Hz
