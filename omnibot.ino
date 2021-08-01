@@ -221,9 +221,9 @@ void loop(){
     case RGT:
     case REV:
     case LFT:
-    dir = cmd - 1; // convert the drive commands to 1 thru 4
+    // dir = cmd - 1; // convert the drive commands to 1 thru 4
     moving = true; // Update the robot state to moving
-    Move(dir); // Do the actual moving
+    Move(cmd); // Do the actual moving
     moving = false;
     
     break;
